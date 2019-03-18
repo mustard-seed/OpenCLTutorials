@@ -31,6 +31,17 @@ include_directories(
 include_directories(
     $ENV{INTELFPGAOCLSDKROOT}/host/include
 )
+
+##################################
+#Add the Altera Library to link with
+##################################
+set (intel_fpga_libraries
+        acl_emulator_kernel_rt
+        alteracl
+        alterahalmmd
+        elf
+        OpenCL
+)
 ###########################################################
 #Intel FPGA OpenCL SDK Compile and linkage configurations
 ###########################################################
@@ -67,17 +78,35 @@ else()
     message (FATAL_ERROR "Unsupported board!")
 endif()
 
+#######################################
+##Add the library for the host below
+######################################
+
+#####################################
+##Add unit test for the host library below
+#####################################
 add_executable (${PROJECT_NAME}_host ${HOST_SRC})
 set_target_properties (${PROJECT_NAME}_host PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 target_link_libraries(${PROJECT_NAME}_host
-        acl_emulator_kernel_rt
-        alteracl
-        alterahalmmd
-        elf
-        OpenCL                
+        ${intel_fpga_libraries}                
     )
 
 
+####################################
+##Generate the hardware targets
+####################################
+
+include (aoc.cmake)
+
+# Find the kernel source files. Note, GLOB isn't the recommended way. One needs to touch the CMakesList.txt to effect changes
+file(GLOB_RECURSE kernel_files
+     ${CMAKE_CURRENT_SOURCE_DIR}/device/*.cl
+)
+
+add_hw_emulation_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
+add_hw_report_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
+add_hw_profile_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
+add_hw_release_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
 
 
 
