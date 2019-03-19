@@ -71,6 +71,15 @@ elseif (BOARD_NAME MATCHES "A10REF")
     link_directories(
         $ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib
         $ENV{INTELFPGAOCLSDKROOT}/board/a10_ref/linux64/lib
+    )
+elseif (BOARD_NAME MATCHES "A10PAC")
+    ##Add library directories for a10_pac
+    message (STATUS "Linking against A10-Pac libraries")
+    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib")
+    message (STATUS "$ENV{AOCL_BOARD_PACKAGE_ROOT}/linux64/lib")
+    link_directories(
+        $ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib
+        $ENV{AOCL_BOARD_PACKAGE_ROOT}/linux64/lib
     ) 
 elseif (BOARD_NAME MATCHES "DE5ANET")
     ##Add library directories for de5a_net
