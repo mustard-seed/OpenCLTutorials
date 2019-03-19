@@ -42,6 +42,14 @@ set (intel_fpga_libraries
         elf
         OpenCL
 )
+
+##################################
+#Add the RTL directories and libraries
+##################################
+set (rtl_directory ${CMAKE_CURRENT_SOURCE_DIR}/device/RTL
+)
+
+set (rtl_lib )
 ###########################################################
 #Intel FPGA OpenCL SDK Compile and linkage configurations
 ###########################################################
@@ -103,10 +111,33 @@ file(GLOB_RECURSE kernel_files
      ${CMAKE_CURRENT_SOURCE_DIR}/device/*.cl
 )
 
-add_hw_emulation_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
-add_hw_report_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
-add_hw_profile_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
-add_hw_release_target (${PROJECT_NAME} ${kernel_files} ${CMAKE_CURRENT_SOURCE_DIR}/host)
+add_hw_emulation_target (
+    TARGET_NAME ${PROJECT_NAME} 
+    SOURCES_LIST ${kernel_files} 
+    HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/host 
+    RTL_DIR ${rtl_directory} 
+    RTL_LIB ${rtl_lib})
+
+add_hw_report_target (
+    TARGET_NAME ${PROJECT_NAME} 
+    SOURCES_LIST ${kernel_files} 
+    HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/host 
+    RTL_DIR ${rtl_directory} 
+    RTL_LIB ${rtl_lib})
+
+add_hw_profile_target (
+    TARGET_NAME ${PROJECT_NAME} 
+    SOURCES_LIST ${kernel_files} 
+    HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/host 
+    RTL_DIR ${rtl_directory} 
+    RTL_LIB ${rtl_lib})
+
+add_hw_release_target (
+    TARGET_NAME ${PROJECT_NAME} 
+    SOURCES_LIST ${kernel_files} 
+    HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/host 
+    RTL_DIR ${rtl_directory} 
+    RTL_LIB ${rtl_lib})
 
 
 

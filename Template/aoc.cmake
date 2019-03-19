@@ -1,65 +1,124 @@
 # Functions used to generate the hardware targets
 
-function(add_hw_emulation_target TARGET_NAME SOURCES_LIST HEADER_DIR)
+function(add_hw_emulation_target)
+    set (options )
+    set (oneValueArgs TARGET_NAME HEADER_DIR RTL_DIR RTL_LIB)
+    set (multiValueArgs  SOURCES_LIST)
 
-    list(REMOVE_DUPLICATES SOURCES_LIST)
-    list(SORT SOURCES_LIST)
+    cmake_parse_arguments(add_hw_emulation_target "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )   
+    
+    list(REMOVE_DUPLICATES add_hw_emulation_target_SOURCES_LIST)
+    list(SORT add_hw_emulation_target_SOURCES_LIST)
 
-    set (target_name_local "${TARGET_NAME}_hw_emu")
+    set (target_name_local "${add_hw_emulation_target_TARGET_NAME}_hw_emu")
+
+    list (APPEND occflags -v -report -march=emulator -emulator-channel-depth-model=strict -fp-relaxed -DEMULATOR
+                -o ${target_name_local}
+                -I=${add_hw_emulation_target_HEADER_DIR})
+
+    if ("${add_hw_emulation_target_RLT_LIB}" STREQUAL "")
+    else()
+        list (APPEND occflags -L ${add_hw_emulation_target_RTL_DIR}
+                -l ${add_hw_emulation_target_RTL_LIB})
+    endif()
+
+    list (APPEND occflags ${add_hw_emulation_target_SOURCES_LIST})
     
     add_custom_target(${target_name_local}
-        COMMAND aoc -v -report -march=emulator -emulator-channel-depth-model=strict -fp-relaxed -DEMULATOR
-                -o ${target_name_local}
-                "-I=${HEADER_DIR}"
-                ${SOURCES_LIST}
+        COMMAND aoc ${occflags}
     )
     
 endfunction()
 
-function(add_hw_report_target TARGET_NAME SOURCES_LIST HEADER_DIR)
+function(add_hw_report_target)
 
-    list(REMOVE_DUPLICATES SOURCES_LIST)
-    list(SORT SOURCES_LIST)
+    set (options )
+    set (oneValueArgs TARGET_NAME HEADER_DIR RTL_DIR RTL_LIB)
+    set (multiValueArgs  SOURCES_LIST)
 
-    set (target_name_local "${TARGET_NAME}_hw_report")
+    cmake_parse_arguments(add_hw_report_target "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )  
+
+    list(REMOVE_DUPLICATES add_hw_report_target_SOURCES_LIST)
+    list(SORT add_hw_report_target_SOURCES_LIST)
+
+    set (target_name_local "${add_hw_report_target_TARGET_NAME}_hw_report")
+    
+    list (APPEND occflags -v -report -c -fp-relaxed
+                -o ${target_name_local}
+                -I=${add_hw_report_target_HEADER_DIR})
+
+    if ("${add_hw_report_target_RLT_LIB}" STREQUAL "")
+    else()
+        list (APPEND occflags -L ${add_hw_report_target_RTL_DIR}
+                -l ${add_hw_report_target_RTL_LIB})
+    endif()
+
+    list (APPEND occflags ${add_hw_report_target_SOURCES_LIST})
     
     add_custom_target(${target_name_local}
-        COMMAND aoc -v -report -fp-relaxed -c
-                -o ${target_name_local}
-                "-I=${HEADER_DIR}"
-                ${SOURCES_LIST}
+        COMMAND aoc ${occflags}
     )
     
 endfunction()
 
-function(add_hw_profile_target TARGET_NAME SOURCES_LIST HEADER_DIR)
+function(add_hw_profile_target)
 
-    list(REMOVE_DUPLICATES SOURCES_LIST)
-    list(SORT SOURCES_LIST)
+    set (options )
+    set (oneValueArgs TARGET_NAME HEADER_DIR RTL_DIR RTL_LIB)
+    set (multiValueArgs  SOURCES_LIST)
 
-    set (target_name_local "${TARGET_NAME}_hw_profile")
+    cmake_parse_arguments(add_hw_profile_target "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )  
+
+    list(REMOVE_DUPLICATES add_hw_profile_target_SOURCES_LIST)
+    list(SORT add_hw_profile_target_SOURCES_LIST)
+
+    set (target_name_local "${add_hw_profile_target_TARGET_NAME}_hw_profile")
+    
+    list (APPEND occflags -v -report -fp-relaxed -profile -high-effort
+                -o ${target_name_local}
+                -I=${add_hw_profile_target_HEADER_DIR})
+
+    if ("${add_hw_emulation_target_RLT_LIB}" STREQUAL "")
+    else()
+        list (APPEND occflags -L ${add_hw_profile_target_RTL_DIR}
+                -l ${add_hw_profile_target_RTL_LIB})
+    endif()
+
+    list (APPEND occflags ${add_hw_profile_target_SOURCES_LIST})
     
     add_custom_target(${target_name_local}
-        COMMAND aoc -v -report -fp-relaxed -profile
-                -o ${target_name_local}
-                "-I=${HEADER_DIR}"
-                ${SOURCES_LIST}
+        COMMAND aoc ${occflags}
     )
     
 endfunction()
 
-function(add_hw_release_target TARGET_NAME SOURCES_LIST HEADER_DIR)
+function(add_hw_release_target)
 
-    list(REMOVE_DUPLICATES SOURCES_LIST)
-    list(SORT SOURCES_LIST)
+    set (options )
+    set (oneValueArgs TARGET_NAME HEADER_DIR RTL_DIR RTL_LIB)
+    set (multiValueArgs  SOURCES_LIST)
 
-    set (target_name_local "${TARGET_NAME}_hw_release")
+    cmake_parse_arguments(add_hw_release_target "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )  
+
+    list(REMOVE_DUPLICATES add_hw_release_target_SOURCES_LIST)
+    list(SORT add_hw_release_target_SOURCES_LIST)
+
+    set (target_name_local "${add_hw_release_target_TARGET_NAME}_hw_release")
+    
+    list (APPEND occflags -v -report -fp-relaxed -high-effort
+                -o ${target_name_local}
+                -I=${add_hw_release_target_HEADER_DIR})
+
+    if ("${add_hw_release_target_RLT_LIB}" STREQUAL "")
+    else()
+        list (APPEND occflags -L ${add_hw_release_target_RTL_DIR}
+                -l ${add_hw_release_target_RTL_LIB})
+    endif()
+
+    list (APPEND occflags ${add_hw_release_target_SOURCES_LIST})
     
     add_custom_target(${target_name_local}
-        COMMAND aoc -v -report -fp-relaxed -high-effort
-                -o ${target_name_local}
-                "-I=${HEADER_DIR}"
-                ${SOURCES_LIST}
+        COMMAND aoc ${occflags}
     )
     
 endfunction()
