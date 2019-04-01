@@ -49,8 +49,8 @@ set (intel_fpga_libraries
 set (rtl_directory ${CMAKE_CURRENT_SOURCE_DIR}/device/RTL
 )
 
-set (rtl_lib )
-include_directories (${rtl_directory})
+set (rtl_lib rtl_lib.aoclib)
+INCLUDE_DIRECTORIES (${rtl_directory})
 ###########################################################
 #Intel FPGA OpenCL SDK Compile and linkage configurations
 ###########################################################
@@ -69,36 +69,12 @@ if (BOARD_NAME MATCHES "DE10Standard")
 elseif (BOARD_NAME MATCHES "A10REF")
     ##Add library directories for a10_ref
     message (STATUS "Linking against A10-Ref libraries")
-    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib")
-    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/board/a10_ref/linux64/lib")
-    file (GLOB intelfpga_host_libraries
-        $ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib/*.so
-        )
-    file (GLOB intelfpga_device_libraries
-        $ENV{INTELFPGAOCLSDKROOT}/board/a10_ref/linux64/lib/*.so
-        )
 elseif (BOARD_NAME MATCHES "A10PAC")
     ##Add library directories for a10_pac
     message (STATUS "Linking against A10-Pac libraries")
-    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib")
-    message (STATUS "$ENV{AOCL_BOARD_PACKAGE_ROOT}/linux64/lib")
-    file (GLOB intelfpga_host_libraries
-        $ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib/*.so
-        )
-    file (GLOB intelfpga_device_libraries
-        $ENV{AOCL_BOARD_PACKAGE_ROOT}/linux64/lib/*.so
-        )
 elseif (BOARD_NAME MATCHES "DE5ANET")
     ##Add library directories for de5a_net
     message (STATUS "Linking against DE5A-NET libraries")
-    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib")
-    message (STATUS "$ENV{INTELFPGAOCLSDKROOT}/board/de5a_net_e1/linux64/lib")
-    file (GLOB intelfpga_host_libraries
-        $ENV{INTELFPGAOCLSDKROOT}/host/linux64/lib/*.so
-        )
-    file (GLOB intelfpga_device_libraries
-         $ENV{INTELFPGAOCLSDKROOT}/board/de5a_net_e1/linux64/lib/*.so
-        )
 else()
     message (STATUS "The board is ${BOARD_NAME}")
     message (FATAL_ERROR "Unsupported board!")
@@ -107,25 +83,38 @@ endif()
 #######################################
 ##Add extra library for the host below
 ######################################
-#find_package (OpenCV 4.1.0 REQUIRED EXACT PATHS /home/jamesliu/arm_opencv/Build)
+set (OpenCV_DIR /home/jamesliu/arm_opencv/Build CACHE STRING "Path of OpenCV")
+find_package (OpenCV REQUIRED )
 
-#include_directories(${OpenCV_INCLUDE_DIRS})
-
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_definitions(-DUSE_OPENCV)
 #####################################
 ##Add unit test for the host library below
 #####################################
 add_definitions(-DFPGA_DEVICE)
 add_executable (${PROJECT_NAME}_host ${HOST_SRC})
 
-set_target_properties (${PROJECT_NAME}_host PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
-target_link_libraries(${PROJECT_NAME}_host
+if ("${intelfpga_host_libraries}" STREQUAL "")
+    #Hack for non arm boards
+    execute_process(
+            COMMAND aocl link-config
+            OUTPUT_VARIABLE aocl_link_config
+        )
+    #Need to remove the newline, or the make file will complain "missing separator"
+    string(REGEX REPLACE "\n$" "" aocl_link_config "${aocl_link_config}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${aocl_link_config}")
+else()
+    target_link_libraries(${PROJECT_NAME}_host
          ${intelfpga_host_libraries}
          ${intelfpga_device_libraries}
          )
+endif()
+
 target_link_libraries(${PROJECT_NAME}_host
-        rt
-        pthread         
+         rt
+         pthread
     )
+set_target_properties (${PROJECT_NAME}_host PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 
 ####################################
